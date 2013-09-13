@@ -6,7 +6,7 @@
 %%
 %% minted.dtx  (with options: `package')
 %% Copyright 2010--2011 Konrad Rudolph
-%% 
+%%
 %% This work may be distributed and/or modified under the
 %% conditions of the LaTeX Project Public License, either version 1.3
 %% of this license or (at your option) any later version.
@@ -14,18 +14,18 @@
 %%   http://www.latex-project.org/lppl.txt
 %% and version 1.3 or later is part of all distributions of LaTeX
 %% version 2005/12/01 or later.
-%% 
+%%
 %% Additionally, the project may be distributed under the terms of the new BSD
 %% license.
-%% 
+%%
 %% This work has the LPPL maintenance status `maintained'.
-%% 
+%%
 %% The Current Maintainer of this work is Konrad Rudolph.
-%% 
+%%
 %% This work consists of the files minted.dtx and minted.ins
 %% and the derived file minted.sty.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{minted}[2013/08/21 v2.0-alpha2 ]
+\ProvidesPackage{minted}[2013/08/21 v2.0-alpha2]
 
 \RequirePackage{keyval}
 \RequirePackage{fancyvrb}
@@ -51,20 +51,25 @@
 \StrSubstitute{\jobname}{ }{_}[\minted@jobname]
 \StrSubstitute{\minted@jobname}{"}{}[\minted@jobname]
 \StrSubstitute{\minted@jobname}{*}{-}[\minted@jobname]
-\newcommand{\minted@cachedir}{.minted-\minted@jobname}
+\newcommand{\minted@cachedir}{/tmp/minted.d/minted-\minted@jobname}
+\newcommand{\minted@hasher}{/tmp/minted-xetex-hasher.py}
+\newcommand{\minted@cmdfile}{/tmp/\minted@jobname.mintedcmd}
+\newcommand{\minted@mdfile}{/tmp/\minted@jobname.mintedmd5}
 \expandafter\ifx\csname XeTeXinterchartoks\endcsname\relax
 \else
-\begin{VerbatimOut}[commandchars=!\[\]]{minted-xetex-hasher.py}
+\begin{VerbatimOut}[commandchars=!\[\]]{\minted@hasher}
 import sys
 import hashlib
 hasher = hashlib.sha1()
-f = open('!jobname.mintedcmd', 'rb')
+cmdfilename = '!minted@cmdfile'
+f = open (cmdfilename, 'rb')
 hasher.update(f.read())
 f.close()
 f = open(sys.argv[1], 'rb')
 hasher.update(f.read())
 f.close()
-f = open('!jobname.mintedmd5', 'w')
+md5filename = '!minted@mdfile'
+f = open(md5filename, 'w')
 macro = r'\edef\minted@hash{' + hasher.hexdigest() + '}%\n'
 f.write('\\makeatletter\n')
 f.write(macro)
@@ -417,11 +422,11 @@ f.close()
       \expandafter\ifx\csname XeTeXinterchartoks\endcsname\relax
         \edef\minted@hash{\pdf@filemdfivesum{#1}\pdf@mdfivesum{\minted@cmd}}%
       \else
-        \immediate\openout\minted@code\jobname.mintedcmd
+        \immediate\openout\minted@code\minted@cmdfile
         \immediate\write\minted@code{\minted@cmd}%
         \immediate\closeout\minted@code
-        \immediate\write18{python minted-xetex-hasher.py "#1"}
-        \input{\jobname.mintedmd5}
+        \immediate\write18{python /tmp/minted-xetex-hasher.py "#1"}
+        \input{\minted@mdfile}
       \fi
       \ifwindows
         \edef\minted@infile{%
@@ -588,9 +593,9 @@ f.close()
 \AtEndDocument{
   \expandafter\ifx\csname XeTeXinterchartoks\endcsname\relax
   \else
-    \DeleteFile{minted-xetex-hasher.py}
-    \DeleteFile{\jobname.mintedcmd}
-    \DeleteFile{\jobname.mintedmd5}
+    \DeleteFile{\minted@hasher}
+    \DeleteFile{\minted@cmdfile}
+    \DeleteFile{\minted@mdfile}
   \fi
   \DeleteFile{\jobname.pyg}%
   \DeleteFile{\jobname.out.pyg}%
