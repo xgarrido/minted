@@ -62,7 +62,10 @@ import sys
 import hashlib
 hasher = hashlib.sha1()
 cmdfilename = '!minted@cmdfile'
-f = open (cmdfilename, 'rb')
+try:
+    f = open (cmdfilename, 'rb')
+except IOError:
+    sys.exit()
 hasher.update(f.read())
 f.close()
 f = open(sys.argv[1], 'rb')
@@ -575,16 +578,14 @@ f.close()
 \AtEndOfPackage{
   \ifnum\pdf@shellescape=1\relax\else
     \PackageError{minted}
-     {You must invoke LaTeX with the
-      -shell-escape flag}
+     {You must invoke LaTeX with the -shell-escape flag}
      {Pass the -shell-escape flag to LaTeX. Refer to the minted.sty
       documentation for more information.}%
   \fi
   \TestAppExists{pygmentize}
   \ifAppExists\else
     \PackageError{minted}
-     {You must have `pygmentize' installed
-      to use this package}
+     {You must have `pygmentize' installed to use this package}
      {Refer to the installation instructions in the minted
       documentation for more information.}
   \fi
@@ -593,9 +594,9 @@ f.close()
 \AtEndDocument{
   \expandafter\ifx\csname XeTeXinterchartoks\endcsname\relax
   \else
-    \DeleteFile{\minted@hasher}
-    \DeleteFile{\minted@cmdfile}
-    \DeleteFile{\minted@mdfile}
+  \DeleteFile{\minted@hasher}
+  \DeleteFile{\minted@cmdfile}
+  \DeleteFile{\minted@mdfile}
   \fi
   \DeleteFile{\jobname.pyg}%
   \DeleteFile{\jobname.out.pyg}%
